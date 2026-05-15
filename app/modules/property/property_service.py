@@ -11,4 +11,5 @@ def create_property(db: Session, data):
     return new_property
 
 def get_all_properties(db: Session):
-    
+    return db.query(Property).all()
+
