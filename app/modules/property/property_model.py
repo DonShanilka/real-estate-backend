@@ -47,5 +47,4 @@ class Property(Base):
     
     create_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    owner = relationship("User")
-    
+    owner = relationship("User")    
