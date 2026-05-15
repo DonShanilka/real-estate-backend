@@ -1,20 +1,30 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.exc import OperationalError
 
-DATABASE_URL = "mysql+pymysql://root:Shanilka800%40%23@localhost:3306"
 
-# connect WITHOUT database
-engine = create_engine(DATABASE_URL)
+MYSQL_SERVER_URL = "mysql+pymysql://root:Shanilka800%40%23@localhost:3306"
 
-# Auto create database
-with engine.connect() as conn:
-    conn.execute(text("CREATE DATABASE IF NOT EXISTS real_estate_db"))
+DATABASE_NAME = "real_estate_db"
+
+DATABASE_URL = f"{MYSQL_SERVER_URL}/{DATABASE_NAME}"
+
+# CREATE DATABASE IF NOT EXISTS
+
+server_engine = create_engine(MYSQL_SERVER_URL)
+
+with server_engine.connect() as conn:
+    conn.execute(
+        text(f"CREATE DATABASE IF NOT EXISTS {DATABASE_NAME}")
+    )
     conn.commit()
 
-# reconnect WITH database
-DATABASE_URL_DB = "mysql+pymysql://root:Shanilka800%40%23@localhost:3306/real_estate_db"
+# MAIN DATABASE ENGINE
 
-engine = create_engine(DATABASE_URL_DB)
+engine = create_engine(
+    DATABASE_URL,
+    echo=True
+)
 
 SessionLocal = sessionmaker(
     autocommit=False,
