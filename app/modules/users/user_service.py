@@ -9,21 +9,20 @@ def get_user_by_id(db: Session, user_id: int):
 
 def update_user(db: Session, user_id: int, user_data):
     user = db.query(User).filter(User.id == user_id).first()
-    
+
     if not user:
         return None
-    
-    if user_data.phone:
-        user.phone = user_data.phone
-        
-    if user_data.profile_image:
-        user.profile_image = user_data.profile_image
-        
+
+    for key, value in user_data.dict(exclude_unset=True).items():
+        setattr(user, key, value)
+
     db.commit()
     db.refresh(user)
+
+    return user
     
 def delete_user(db: Session, user_id: int):
-    user = db.query(User).filter(User.id == user_id).filter()
+    user = db.query(User).filter(User.id == user_id).first()
     
     if not user:
         return None

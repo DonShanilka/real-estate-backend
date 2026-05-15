@@ -35,12 +35,11 @@ def single_user(user_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{user_id}")
 def update_single_user(user_id: int, user_data: UpdateUserSchema, db: Session = Depends(get_db)):
-    
     user = update_user(db, user_id, user_data)
-    
+
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     return {
         "message": "User updated successfully",
         "data": user
