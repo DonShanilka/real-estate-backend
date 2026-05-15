@@ -5,18 +5,30 @@ from app.core.database import (
     Base
 )
 
-from app.modules.auth.auth_routes import (
-    router as auth_router
-)
+# Import routers
+from app.modules.auth.auth_routes import router as auth_router
+from app.modules.users.user_routes import router as user_router
 
+# Import models
+from app.modules.users.user_model import User
+
+# Create tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+# Create FastAPI app
+app = FastAPI(
+    title="Real Estate API",
+    version="1.0.0"
+)
 
+# Include routers
 app.include_router(auth_router)
+app.include_router(user_router)
 
+# Root route
 @app.get("/")
 def root():
     return {
+        "success": True,
         "message": "Real Estate API Running"
     }
