@@ -42,6 +42,9 @@ class Property(Base):
     
     owner_id = Column(Integer, ForeignKey("users.id"))
     
+    image_url = Column(String(500), nullable=False)
+    video_url = Column(String(500), nullable=False)
+    
     create_at = Column(DateTime(timezone=True), server_default=func.now())
     
     owner = relationship("User")
