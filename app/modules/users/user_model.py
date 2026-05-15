@@ -14,7 +14,7 @@ class User(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String(150), nullable=False)
-    emil = Column(String(150), unique=True, nullable=False)
+    email = Column(String(150), unique=True, nullable=False)
     phone = Column(String(20))
     password = Column(String(255), nullable=False)
     
