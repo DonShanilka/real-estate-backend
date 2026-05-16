@@ -1,10 +1,9 @@
-# Python cache
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 
-# Virtual env
+# Virtual Environment
 venv/
 .env
 
@@ -12,11 +11,18 @@ venv/
 .vscode/
 .idea/
 
-# OS files
+# macOS
 .DS_Store
 
-# Pytest
+# Logs
+*.log
+
+# Database
+*.sqlite3
+
+# Testing
 .pytest_cache/
 
-# Alembic
-alembic/versions/*.pyc
+# Build
+dist/
+build/
