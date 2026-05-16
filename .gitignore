@@ -19,4 +19,5 @@ env/
 .pytest_cache/
 
 # Alembic
-alembic/versions/*.pyc
+alembic/versions/*.pyc__pycache__/
+*.pyc
