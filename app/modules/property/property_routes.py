@@ -104,7 +104,7 @@ async def create_property_route(
 
 
 # GET ALL PROPERTIES
-@router.get("/")
+@router.get("/getAllProperty")
 def get_all_properties_route(
     db: Session = Depends(get_db)
 ):
@@ -119,7 +119,7 @@ def get_all_properties_route(
 
 
 # GET SINGLE PROPERTY
-@router.get("/{property_id}")
+@router.get("/getById/{property_id}")
 def get_single_property_route(
     property_id: int,
     db: Session = Depends(get_db),
@@ -144,7 +144,7 @@ def get_single_property_route(
 
 
 # UPDATE PROPERTY
-@router.put("/{property_id}")
+@router.put("/updateProperty/{property_id}")
 async def update_property_route(
 
     property_id: int,
@@ -217,7 +217,7 @@ async def update_property_route(
 
 
 # DELETE PROPERTY
-@router.delete("/{property_id}")
+@router.delete("/deleteProperty/{property_id}")
 def delete_property_route(
     property_id: int,
     db: Session = Depends(get_db),
