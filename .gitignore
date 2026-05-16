@@ -15,5 +15,8 @@ venv/
 # OS files
 .DS_Store
 
-# logs
-*.log
+# Pytest
+.pytest_cache/
+
+# Alembic
+alembic/versions/*.pyc
