@@ -20,7 +20,6 @@ with server_engine.connect() as conn:
     conn.commit()
 
 # MAIN DATABASE ENGINE
-
 engine = create_engine(
     DATABASE_URL,
     echo=True
@@ -33,3 +32,11 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
+
+# DATABASE DEPENDENCY
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

@@ -1,7 +1,9 @@
 from pydantic import BaseModel
 from typing import Optional
 
+
 class SearchQuery(BaseModel):
+
     keyword: Optional[str] = None
     city: Optional[str] = None
     district: Optional[str] = None
