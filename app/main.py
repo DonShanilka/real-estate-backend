@@ -9,6 +9,7 @@ from app.core.database import (
 from app.modules.auth.auth_routes import router as auth_router
 from app.modules.users.user_routes import router as user_router
 from app.modules.property.property_routes import router as property_router
+from app.modules.search.search_routes import router as search_router
 
 # Import models
 from app.modules.users.user_model import User
@@ -26,6 +27,7 @@ app = FastAPI(
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(property_router)
+app.include_router(search_router)
 
 # Root route
 @app.get("/")
