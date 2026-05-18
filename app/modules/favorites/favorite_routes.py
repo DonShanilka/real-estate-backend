@@ -6,6 +6,7 @@ from app.core.security import get_current_user
 
 from .favorite_service import FavoriteService
 
+
 router = APIRouter(
     prefix="/favorites",
     tags=["Favorites"]

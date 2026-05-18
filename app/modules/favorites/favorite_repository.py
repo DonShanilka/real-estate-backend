@@ -5,44 +5,43 @@ from app.modules.favorites.favorite_model import Favorite
 class FavoriteRepository:
 
     @staticmethod
-    def add_favorite(db: Session, user_id: int, property_id: int):
+    def add(db: Session, user_id: int, property_id: int):
 
-        # check duplicate
         existing = db.query(Favorite).filter(
             Favorite.user_id == user_id,
             Favorite.property_id == property_id
         ).first()
 
         if existing:
-            return existing
+            return {"message": "Already in favorites"}
 
-        favorite = Favorite(
+        fav = Favorite(
             user_id=user_id,
             property_id=property_id
         )
 
-        db.add(favorite)
+        db.add(fav)
         db.commit()
-        db.refresh(favorite)
+        db.refresh(fav)
 
-        return favorite
+        return fav
 
     @staticmethod
-    def remove_favorite(db: Session, user_id: int, property_id: int):
+    def remove(db: Session, user_id: int, property_id: int):
 
-        favorite = db.query(Favorite).filter(
+        fav = db.query(Favorite).filter(
             Favorite.user_id == user_id,
             Favorite.property_id == property_id
         ).first()
 
-        if favorite:
-            db.delete(favorite)
+        if fav:
+            db.delete(fav)
             db.commit()
 
         return {"message": "Removed"}
 
     @staticmethod
-    def get_user_favorites(db: Session, user_id: int):
+    def get_all(db: Session, user_id: int):
 
         return db.query(Favorite).filter(
             Favorite.user_id == user_id

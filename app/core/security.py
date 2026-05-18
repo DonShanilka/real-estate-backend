@@ -1,6 +1,7 @@
 import bcrypt
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
+
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
@@ -11,7 +12,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
-# hash password
+# -------------------
+# HASH PASSWORD
+# -------------------
 def hash_password(password: str):
     return bcrypt.hashpw(
         password.encode("utf-8"),
@@ -19,7 +22,9 @@ def hash_password(password: str):
     ).decode("utf-8")
 
 
-# verify password
+# -------------------
+# VERIFY PASSWORD
+# -------------------
 def verify_password(plain_password: str, hashed_password: str):
     return bcrypt.checkpw(
         plain_password.encode("utf-8"),
@@ -27,7 +32,9 @@ def verify_password(plain_password: str, hashed_password: str):
     )
 
 
-# create jwt token
+# -------------------
+# CREATE TOKEN
+# -------------------
 def create_access_token(data: dict):
     to_encode = data.copy()
 
@@ -40,12 +47,14 @@ def create_access_token(data: dict):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-# get current user
+# -------------------
+# GET CURRENT USER
+# -------------------
 def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
-        user_id: str = payload.get("user_id")
+        user_id = payload.get("user_id")
 
         if user_id is None:
             raise HTTPException(
@@ -58,5 +67,5 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise HTTPException(
             status_code=401,
-            detail="Token is invalid or expired"
+            detail="Token expired or invalid"
         )
