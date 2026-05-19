@@ -41,12 +41,41 @@ def get_reviews(
     )
 
 
-# @router.get("/average/{property_id}")
-# def get_average_rating(
-#     property_id: int,
-#     db: Session = Depends(get_db)
-# ):
-#     return ReviewService.average_rating(
-#         db,
-#         property_id
-#     )
+@router.get("/average/{property_id}")
+def get_average_rating(
+    property_id: int,
+    db: Session = Depends(get_db)
+):
+    return ReviewService.average_rating(
+        db,
+        property_id
+    )
+
+
+@router.put("/{review_id}")
+def update_review(
+    review_id: int,
+    review: ReviewCreate,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    return ReviewService.update(
+        db,
+        review_id,
+        user["id"],
+        review.rating,
+        review.comment
+    )
+
+
+@router.delete("/{review_id}")
+def delete_review(
+    review_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    return ReviewService.delete(
+        db,
+        review_id,
+        user["id"]
+    )
