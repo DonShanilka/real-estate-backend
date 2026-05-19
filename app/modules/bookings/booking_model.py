@@ -1,22 +1,48 @@
-from sqlalchemy import (Column, Integer, String, Text, Float, ForeignKey, DateTime, Enum, Date)
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    DateTime
+)
+
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+
 from app.core.database import Base
-import enum
+
 
 class Booking(Base):
     __tablename__ = "bookings"
-    
-    id = Column(Integer, primary_key=True)
-    
-    booking_date_time = Column(DateTime)
-    
-    status = Column(String(50), default="PENDING")
-    
-    user_id = Column(Integer, ForeignKey("users.id"))
-    property_id = Column(Integer, ForeignKey("properties.id"))
-    
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+    property_id = Column(
+        Integer,
+        ForeignKey("properties.id"),
+        nullable=False
+    )
+
+    check_in = Column(DateTime, nullable=False)
+    check_out = Column(DateTime, nullable=False)
+
+    total_price = Column(Integer, nullable=False)
+
+    status = Column(
+        String(50),
+        default="pending"
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+
     user = relationship("User")
     property = relationship("Property")
-    
-    
