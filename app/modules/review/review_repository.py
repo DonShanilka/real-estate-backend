@@ -11,16 +11,16 @@ class ReviewRepository:
         db: Session,
         user_id: int,
         property_id: int,
-        rating: int,
+        rating: float,
         comment: str
     ):
 
-        existing = db.query(Review).filter(
+        existing_review = db.query(Review).filter(
             Review.user_id == user_id,
             Review.property_id == property_id
         ).first()
 
-        if existing:
+        if existing_review:
             return {
                 "message": "You already reviewed this property"
             }
@@ -38,7 +38,6 @@ class ReviewRepository:
 
         return review
 
-
     @staticmethod
     def get_property_reviews(
         db: Session,
@@ -49,14 +48,13 @@ class ReviewRepository:
             Review.property_id == property_id
         ).all()
 
-
     @staticmethod
     def get_average_rating(
         db: Session,
         property_id: int
     ):
 
-        avg = db.query(
+        average = db.query(
             func.avg(Review.rating)
         ).filter(
             Review.property_id == property_id
@@ -64,16 +62,15 @@ class ReviewRepository:
 
         return {
             "property_id": property_id,
-            "average_rating": round(avg or 0, 1)
+            "average_rating": round(average or 0, 1)
         }
 
-    
     @staticmethod
     def update_review(
         db: Session,
         review_id: int,
         user_id: int,
-        rating: int,
+        rating: float,
         comment: str
     ):
 
@@ -95,7 +92,6 @@ class ReviewRepository:
 
         return review
 
-    
     @staticmethod
     def delete_review(
         db: Session,

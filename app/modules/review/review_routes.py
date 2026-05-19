@@ -4,7 +4,11 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_current_user
 
-from .review_schema import ReviewCreate
+from .review_schema import (
+    ReviewCreate,
+    ReviewUpdate
+)
+
 from .review_service import ReviewService
 
 
@@ -21,6 +25,7 @@ def create_review(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
+
     return ReviewService.create(
         db,
         user["id"],
@@ -35,6 +40,7 @@ def get_reviews(
     property_id: int,
     db: Session = Depends(get_db)
 ):
+
     return ReviewService.get_reviews(
         db,
         property_id
@@ -46,6 +52,7 @@ def get_average_rating(
     property_id: int,
     db: Session = Depends(get_db)
 ):
+
     return ReviewService.average_rating(
         db,
         property_id
@@ -55,10 +62,11 @@ def get_average_rating(
 @router.put("/{review_id}")
 def update_review(
     review_id: int,
-    review: ReviewCreate,
+    review: ReviewUpdate,
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
+
     return ReviewService.update(
         db,
         review_id,
@@ -74,6 +82,7 @@ def delete_review(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
+
     return ReviewService.delete(
         db,
         review_id,

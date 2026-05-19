@@ -10,9 +10,10 @@ class ReviewService:
         db: Session,
         user_id: int,
         property_id: int,
-        rating: int,
+        rating: float,
         comment: str
     ):
+
         return ReviewRepository.create_review(
             db,
             user_id,
@@ -26,6 +27,7 @@ class ReviewService:
         db: Session,
         property_id: int
     ):
+
         return ReviewRepository.get_property_reviews(
             db,
             property_id
@@ -36,20 +38,21 @@ class ReviewService:
         db: Session,
         property_id: int
     ):
+
         return ReviewRepository.get_average_rating(
             db,
             property_id
         )
 
-    
     @staticmethod
     def update(
         db: Session,
         review_id: int,
         user_id: int,
-        rating: int,
+        rating: float,
         comment: str
     ):
+
         return ReviewRepository.update_review(
             db,
             review_id,
@@ -58,13 +61,13 @@ class ReviewService:
             comment
         )
 
-    
     @staticmethod
     def delete(
         db: Session,
         review_id: int,
         user_id: int
     ):
+
         return ReviewRepository.delete_review(
             db,
             review_id,
