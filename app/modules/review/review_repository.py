@@ -28,3 +28,29 @@ class ReviewRepository:
         return reviews
     
     
+    @staticmethod
+    def update_review(db: Session, review_id: int, data):
+        
+        review = db.query(Review).filter(Review.id == review_id).first()
+        
+        if not review:
+            return {
+                "success": False,
+                "message": "Review not found"
+            }
+            
+        if data.rating is not None:
+            review.rating = data.rating
+            
+        if data.comment is not None:
+            review.comment = data.comment
+            
+        db.commit()
+        db.refresh(review)
+        
+        return {
+            "success": True,
+            "message": "Review updated",
+            "data": review
+        }
+        
