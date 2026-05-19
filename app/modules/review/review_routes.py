@@ -30,3 +30,14 @@ def create_review(
     )
 
 
+@router.get("/{property_id}")
+def get_reviews(
+    property_id: int,
+    db: Session = Depends(get_db)
+):
+    return ReviewService.get_reviews(
+        db,
+        property_id
+    )
+
+
