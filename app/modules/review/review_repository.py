@@ -54,3 +54,23 @@ class ReviewRepository:
             "data": review
         }
         
+        
+    @staticmethod
+    def delete_review(db: Session, review_id: int):
+        
+        review = db.query(Review).filter(Review.id == review_id).first()
+        
+        if not review:
+            return {
+                "success": False,
+                "message": "Review not foud"
+            }
+            
+        db.delete(review)
+        db.commit()
+        
+        return {
+            "success": True,
+            "message": "Review deleted"
+        }
+        
