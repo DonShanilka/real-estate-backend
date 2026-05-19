@@ -41,3 +41,12 @@ def get_reviews(
     )
 
 
+# @router.get("/average/{property_id}")
+# def get_average_rating(
+#     property_id: int,
+#     db: Session = Depends(get_db)
+# ):
+#     return ReviewService.average_rating(
+#         db,
+#         property_id
+#     )
