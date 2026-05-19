@@ -16,3 +16,8 @@ class ReviewService:
     @staticmethod
     def update_review(db: Session, review_id: int, data):
         return ReviewRepository.update_review(db, review_id, data)
+    
+    
+    @staticmethod
+    def delete_review(db: Session, review_id: int):
+        return ReviewRepository.delete_review(db, review_id)
