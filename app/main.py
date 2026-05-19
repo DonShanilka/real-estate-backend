@@ -12,6 +12,7 @@ from app.modules.property.property_routes import router as property_router
 from app.modules.search.search_routes import router as search_router
 from app.modules.recommendations.recommendation_routes import router as recommendation_router
 from app.modules.favorites.favorite_routes import router as favorites_router
+from app.modules.review.review_routes import router as review_router
 
 
 # Import models
@@ -33,6 +34,7 @@ app.include_router(property_router)
 app.include_router(search_router)
 app.include_router(recommendation_router)
 app.include_router(favorites_router)
+app.include_router(review_router)
 
 # Root route
 @app.get("/")

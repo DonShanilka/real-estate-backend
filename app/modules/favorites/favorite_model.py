@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
 
@@ -12,3 +13,7 @@ class Favorite(Base):
     property_id = Column(Integer, ForeignKey("properties.id"), nullable=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    user = relationship("User")
+
+    property = relationship("Property")

@@ -1,7 +1,19 @@
-from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, DateTime, Enum
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+    Float,
+    ForeignKey,
+    DateTime,
+    Enum
+)
+
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+
 from app.core.database import Base
+
 import enum
 
 
@@ -29,10 +41,15 @@ class Property(Base):
     price = Column(Float, nullable=False)
 
     property_type = Column(Enum(PropertyType))
-    status = Column(Enum(PropertyStatus), default=PropertyStatus.AVAILABLE)
+
+    status = Column(
+        Enum(PropertyStatus),
+        default=PropertyStatus.AVAILABLE
+    )
 
     bedrooms = Column(Integer)
     bathrooms = Column(Integer)
+
     area_size = Column(Float)
 
     address = Column(String(255))
@@ -43,11 +60,20 @@ class Property(Base):
     latitude = Column(Float)
     longitude = Column(Float)
 
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner_id = Column(
+        Integer,
+        ForeignKey("users.id")
+    )
 
-    image_url = Column(String(500), nullable=False)
-    video_url = Column(String(500), nullable=False)
+    image_url = Column(String(500))
+    video_url = Column(String(500))
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
 
-    owner = relationship("User")
+    owner = relationship(
+        "User",
+        back_populates="properties"
+    )

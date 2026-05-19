@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum
 from sqlalchemy.sql import func
 from app.core.database import Base
 import enum
+from sqlalchemy.orm import relationship
 
 class UserRole(enum.Enum):
     ADMIN = "ADMIN"
@@ -26,3 +27,9 @@ class User(Base):
     is_verified = Column(Boolean, default=False)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+
+    properties = relationship(
+        "Property",
+        back_populates="owner"
+    )
