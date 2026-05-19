@@ -13,3 +13,6 @@ class ReviewService:
         return ReviewRepository.get_property_review(db, property_id)
     
     
+    @staticmethod
+    def update_review(db: Session, review_id: int, data):
+        return ReviewRepository.update_review(db, review_id, data)
