@@ -14,6 +14,8 @@ from app.modules.recommendations.recommendation_routes import router as recommen
 from app.modules.favorites.favorite_routes import router as favorites_router
 from app.modules.review.review_routes import router as review_router
 from app.modules.bookings.booking_routes import router as booking_router
+from app.modules.chat.chat_routes import router as chat_router
+from app.modules.chat.websocket_routes import router as websocket_router
 
 
 
@@ -38,6 +40,9 @@ app.include_router(recommendation_router)
 app.include_router(favorites_router)
 app.include_router(review_router)
 app.include_router(booking_router)
+
+app.include_router(chat_router)
+app.include_router(websocket_router)
 
 # Root route
 @app.get("/")
