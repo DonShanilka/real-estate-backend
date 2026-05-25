@@ -23,17 +23,8 @@ class ChatService:
         )
 
     @staticmethod
-    def conversation(
-        db: Session,
-        user_id: int,
-        other_user_id: int
-    ):
-
-        return ChatRepository.get_conversation(
-            db,
-            user_id,
-            other_user_id
-        )
+    def conversation(db: Session, user_id: int, other_user_id: int):
+        return ChatRepository.get_conversation(db, user_id, other_user_id)
 
     @staticmethod
     def my_chats(

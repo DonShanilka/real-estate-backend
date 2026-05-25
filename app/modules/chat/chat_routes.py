@@ -34,14 +34,9 @@ def send_message(
 def get_conversation(
     other_user_id: int,
     db: Session = Depends(get_db),
-    user=Depends(get_current_user)
+    current_user = Depends(get_current_user)   # ← This returns {"id": 3}
 ):
-
-    return ChatService.conversation(
-        db,
-        user["id"],
-        other_user_id
-    )
+    return ChatService.conversation(db, current_user["id"], other_user_id)
 
 
 @router.get("/my")

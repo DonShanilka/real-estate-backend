@@ -31,22 +31,23 @@ class ChatRepository:
     @staticmethod
     def get_conversation(
         db: Session,
-        user_id: int,
-        other_user_id: int
+        current_user_id: int,   # Logged in user (Admin=3 or Buyer=4)
+        other_user_id: int      # Selected user
     ):
-
-        return db.query(Message).filter(
+        messages = db.query(Message).filter(
             or_(
                 and_(
-                    Message.sender_id == user_id,
+                    Message.sender_id == current_user_id,
                     Message.receiver_id == other_user_id
                 ),
                 and_(
                     Message.sender_id == other_user_id,
-                    Message.receiver_id == user_id
+                    Message.receiver_id == current_user_id
                 )
             )
         ).order_by(Message.created_at.asc()).all()
+    
+        return messages
 
     @staticmethod
     def get_my_chats(
