@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
 
@@ -25,7 +25,7 @@ class SearchQuery(BaseModel):
 
 
 class NearbySearchQuery(BaseModel):
-    latitude: float
-    longitude: float
-    radius_km: float = 10
-    limit: int = 50
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    radius_km: float = Field(default=10, gt=0, le=500)
+    limit: int = Field(default=50, ge=1, le=100)

@@ -23,6 +23,8 @@ class SearchRepository:
             .filter(
                 Property.latitude.isnot(None),
                 Property.longitude.isnot(None),
+                Property.latitude.between(-90, 90),
+                Property.longitude.between(-180, 180),
                 distance_km <= radius_km,
             )
             .order_by(distance_km.asc())

@@ -59,8 +59,8 @@ async def create_property_route(
     district: str = Form(None),
     country: str = Form(None),
 
-    latitude: float = Form(None),
-    longitude: float = Form(None),
+    latitude: float = Form(None, ge=-90, le=90),
+    longitude: float = Form(None, ge=-180, le=180),
 
     owner_id: int = Form(...),
 
@@ -69,6 +69,12 @@ async def create_property_route(
 
     db: Session = Depends(get_db),
 ):
+
+    if (latitude is None) != (longitude is None):
+        raise HTTPException(
+            status_code=422,
+            detail="Latitude and longitude must be provided together.",
+        )
 
     property_data = await create_property(
         db=db,
@@ -167,14 +173,20 @@ async def update_property_route(
     district: str = Form(None),
     country: str = Form(None),
 
-    latitude: float = Form(None),
-    longitude: float = Form(None),
+    latitude: float = Form(None, ge=-90, le=90),
+    longitude: float = Form(None, ge=-180, le=180),
 
     image: UploadFile = File(None),
     video: UploadFile = File(None),
 
     db: Session = Depends(get_db),
 ):
+
+    if (latitude is None) != (longitude is None):
+        raise HTTPException(
+            status_code=422,
+            detail="Latitude and longitude must be provided together.",
+        )
 
     property_data = await update_property(
         db=db,
