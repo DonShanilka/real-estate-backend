@@ -22,3 +22,10 @@ class SearchQuery(BaseModel):
 
     page: int = 1
     limit: int = 10
+
+
+class NearbySearchQuery(BaseModel):
+    latitude: float
+    longitude: float
+    radius_km: float = 10
+    limit: int = 50

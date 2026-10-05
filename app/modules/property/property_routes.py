@@ -7,6 +7,7 @@ from fastapi import (
     Form,
 )
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
@@ -17,6 +18,7 @@ from app.modules.property.property_service import (
     get_single_property,
     update_property,
     delete_property,
+    get_property_delete_blockers,
 )
 
 router = APIRouter(
@@ -223,10 +225,28 @@ def delete_property_route(
     db: Session = Depends(get_db),
 ):
 
-    deleted = delete_property(
-        db,
-        property_id
-    )
+    blockers = get_property_delete_blockers(db, property_id)
+    active_references = {name: count for name, count in blockers.items() if count}
+    if active_references:
+        details = ", ".join(
+            f"{count} {name}" for name, count in active_references.items()
+        )
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot delete property {property_id}: it is still referenced by {details}. Resolve these records first; booking history is preserved.",
+        )
+
+    try:
+        deleted = delete_property(
+            db,
+            property_id
+        )
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete this property because it has related reviews, bookings, or favorites. Remove those records first.",
+        ) from exc
 
     if not deleted:
 
