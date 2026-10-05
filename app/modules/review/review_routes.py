@@ -22,7 +22,27 @@ router = APIRouter(
 def get_all_reviews(
     db: Session = Depends(get_db)
 ):
-    return ReviewService.get_all_reviews(db)
+    reviews = ReviewService.get_all_reviews(db)
+    return [
+        {
+            "id": review.id,
+            "user_id": review.user_id,
+            "property_id": review.property_id,
+            "rating": review.rating,
+            "comment": review.comment,
+            "create_at": review.create_at,
+            "user": {
+                "id": review.user.id,
+                "full_name": review.user.full_name,
+                "role": getattr(review.user.role, "value", review.user.role),
+            } if review.user else None,
+            "property": {
+                "id": review.property.id,
+                "title": review.property.title,
+            } if review.property else None,
+        }
+        for review in reviews
+    ]
 
 
 @router.post("/{property_id}")
