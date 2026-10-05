@@ -1,4 +1,6 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+from sqlalchemy.orm import Session
+from app.core.database import get_db
 from app.core.security_ws import get_current_user_from_ws
 from .websocket_manager import manager
 from .chat_service import ChatService  # If you want to save message
@@ -8,6 +10,7 @@ router = APIRouter()
 @router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,
+    db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user_from_ws)   # ← Your JWT validation
 ):
     user_id = current_user["user_id"]
@@ -28,7 +31,7 @@ async def websocket_endpoint(
 
             # Save message to database
             new_message = ChatService.send(
-                db=...,  # You need to inject db or use another way
+                db=db,
                 sender_id=user_id,
                 receiver_id=receiver_id,
                 property_id=property_id,

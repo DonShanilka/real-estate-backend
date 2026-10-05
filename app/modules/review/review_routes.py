@@ -18,6 +18,13 @@ router = APIRouter(
 )
 
 
+@router.get("")
+def get_all_reviews(
+    db: Session = Depends(get_db)
+):
+    return ReviewService.get_all_reviews(db)
+
+
 @router.post("/{property_id}")
 def create_review(
     property_id: int,
