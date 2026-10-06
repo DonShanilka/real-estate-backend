@@ -7,6 +7,4 @@ python-dotenv
 SQLAlchemy
 PyMySQL
 b2sdk
-pandas
-scikit-learn
 python-multipart
