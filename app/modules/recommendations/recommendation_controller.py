@@ -8,9 +8,11 @@ class RecommendationController:
     @staticmethod
     def recommend(
         property_id: int,
-        db: Session
+        db: Session,
+        limit: int = 10,
     ):
         return RecommendationService.recommend(
             db,
-            property_id
+            property_id,
+            limit,
         )
