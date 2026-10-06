@@ -57,7 +57,20 @@ def _find_city(text: str) -> str | None:
     for name in sorted(CITIES, key=len, reverse=True):
         if re.search(rf"\b{re.escape(name)}\b", text, re.IGNORECASE):
             return CITIES[name]
-    return None
+
+    # Accept locations not in the convenience list. Search will compare this
+    # phrase against the database's city, district, and address columns.
+    match = re.search(
+        r"\b(?:in|near|around|at)\s+([a-z][a-z .'-]*?)"
+        r"(?=\s+(?:under|below|above|over|up to|at least|at most|with|without|"
+        r"and|for|that|which|near|around)\b|[,.;!?]|$)",
+        text,
+        re.IGNORECASE,
+    )
+    if not match:
+        return None
+    place = " ".join(match.group(1).split()).strip(" .,-")
+    return place.title() if place else None
 
 
 def _find_property_type(text: str) -> str | None:

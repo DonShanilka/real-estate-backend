@@ -18,6 +18,16 @@ class SearchRepository:
     }
 
     @staticmethod
+    def get_natural_search_candidates(db: Session, limit: int = 500):
+        """Return a bounded set of actual listings to rank against user intent."""
+        return (
+            db.query(Property)
+            .order_by(Property.created_at.desc(), Property.id.desc())
+            .limit(limit)
+            .all()
+        )
+
+    @staticmethod
     def search_properties(db: Session, filters):
 
         query = db.query(Property)
