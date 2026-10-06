@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -15,9 +15,11 @@ router = APIRouter(
 @router.get("/{property_id}")
 def get_recommendations(
     property_id: int,
+    limit: int = Query(default=10, ge=1, le=50),
     db: Session = Depends(get_db)
 ):
     return RecommendationController.recommend(
         property_id,
-        db
+        db,
+        limit,
     )
