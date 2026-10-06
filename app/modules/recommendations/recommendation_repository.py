@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Session
 
-from app.modules.property.property_model import Property
-
-from .recommendation_ml import RecommendationML
+from app.modules.property.property_model import Property, PropertyStatus
+from .recommendation_engine import RecommendationEngine
 
 
 class RecommendationRepository:
@@ -10,56 +9,22 @@ class RecommendationRepository:
     @staticmethod
     def get_recommendations(
         db: Session,
-        property_id: int
+        property_id: int,
+        limit: int = 10,
     ):
-
-        # Get all properties
-        properties = db.query(Property).all()
-
-        if not properties:
+        if limit <= 0:
             return []
 
-        # Build similarity matrix
-        df, similarity = (
-            RecommendationML.build_similarity_matrix(
-                properties
-            )
-        )
-
-        # Find target property index
-        target_index = df[df["id"] == property_id].index
-
-        if len(target_index) == 0:
+        target = db.query(Property).filter(Property.id == property_id).first()
+        if target is None:
             return []
 
-        target_index = target_index[0]
-
-        # Similarity scores
-        similarity_scores = list(
-            enumerate(similarity[target_index])
-        )
-
-        # Sort by similarity
-        sorted_scores = sorted(
-            similarity_scores,
-            key=lambda x: x[1],
-            reverse=True
-        )
-
-        # Get top recommendations
-        recommended_ids = []
-
-        for i in sorted_scores[1:11]:
-
-            property_index = i[0]
-
-            recommended_ids.append(
-                int(df.iloc[property_index]["id"])
+        candidates = (
+            db.query(Property)
+            .filter(
+                Property.id != property_id,
+                Property.status == PropertyStatus.AVAILABLE,
             )
-
-        # Query recommended properties
-        recommendations = db.query(Property).filter(
-            Property.id.in_(recommended_ids)
-        ).all()
-
-        return recommendations
+            .all()
+        )
+        return RecommendationEngine.recommend(target, candidates, limit)
