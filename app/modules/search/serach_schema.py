@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
 
@@ -22,3 +22,7 @@ class SearchQuery(BaseModel):
 
     page: int = 1
     limit: int = 10
+
+
+class NaturalSearchRequest(BaseModel):
+    query: str = Field(min_length=3, max_length=500)
