@@ -26,3 +26,10 @@ class SearchQuery(BaseModel):
 
 class NaturalSearchRequest(BaseModel):
     query: str = Field(min_length=3, max_length=500)
+
+
+class NearbySearchQuery(BaseModel):
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    radius_km: float = Field(default=10, gt=0, le=500)
+    limit: int = Field(default=50, ge=1, le=100)

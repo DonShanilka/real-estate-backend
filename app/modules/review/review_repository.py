@@ -1,10 +1,17 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 
 from .review_model import Review
 
 
 class ReviewRepository:
+
+    @staticmethod
+    def get_all_reviews(db: Session):
+        return db.query(Review).options(
+            joinedload(Review.user),
+            joinedload(Review.property)
+        ).order_by(Review.create_at.desc()).all()
 
     @staticmethod
     def create_review(

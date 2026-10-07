@@ -1,9 +1,13 @@
 fastapi
-uvicorn
+uvicorn[standard]
 python-jose
 passlib[bcrypt]
 pydantic
 python-dotenv
+SQLAlchemy
+PyMySQL
+b2sdk
 numpy
 pandas
 scikit-learn
+python-multipart

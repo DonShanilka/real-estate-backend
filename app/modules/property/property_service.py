@@ -1,6 +1,9 @@
 from sqlalchemy.orm import Session
 
+from app.modules.bookings.booking_model import Booking
+from app.modules.favorites.favorite_model import Favorite
 from app.modules.property.property_model import Property, PropertyType, PropertyStatus
+from app.modules.review.review_model import Review
 from app.core.upload_file import upload_file
 
 
@@ -167,6 +170,14 @@ def get_single_property(
 
 
 # DELETE PROPERTY
+def get_property_delete_blockers(db: Session, property_id: int):
+    return {
+        "reviews": db.query(Review).filter(Review.property_id == property_id).count(),
+        "bookings": db.query(Booking).filter(Booking.property_id == property_id).count(),
+        "favorites": db.query(Favorite).filter(Favorite.property_id == property_id).count(),
+    }
+
+
 def delete_property(
     db: Session,
     property_id: int

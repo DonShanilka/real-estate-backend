@@ -6,6 +6,10 @@ from .review_repository import ReviewRepository
 class ReviewService:
 
     @staticmethod
+    def get_all_reviews(db: Session):
+        return ReviewRepository.get_all_reviews(db)
+
+    @staticmethod
     def create(
         db: Session,
         user_id: int,

@@ -1,5 +1,6 @@
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.modules.property.property_model import Property
 
 
@@ -26,6 +27,38 @@ class SearchRepository:
             .limit(limit)
             .all()
         )
+
+    @staticmethod
+    def search_nearby(db: Session, latitude: float, longitude: float, radius_km: float, limit: int):
+        # Haversine great-circle distance in kilometers; SQL filtering avoids loading
+        # unrelated properties into application memory.
+        distance_km = 6371.0088 * 2 * func.asin(
+            func.sqrt(
+                func.pow(func.sin(func.radians(Property.latitude - latitude) / 2), 2)
+                + func.cos(func.radians(latitude))
+                * func.cos(func.radians(Property.latitude))
+                * func.pow(func.sin(func.radians(Property.longitude - longitude) / 2), 2)
+            )
+        )
+
+        rows = (
+            db.query(Property, distance_km.label("distance_km"))
+            .filter(
+                Property.latitude.isnot(None),
+                Property.longitude.isnot(None),
+                Property.latitude.between(-90, 90),
+                Property.longitude.between(-180, 180),
+                distance_km <= radius_km,
+            )
+            .order_by(distance_km.asc())
+            .limit(limit)
+            .all()
+        )
+
+        return [
+            {"property": property_, "distance_km": round(float(distance), 2)}
+            for property_, distance in rows
+        ]
 
     @staticmethod
     def search_properties(db: Session, filters):

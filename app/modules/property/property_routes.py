@@ -7,6 +7,7 @@ from fastapi import (
     Form,
 )
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
@@ -17,6 +18,7 @@ from app.modules.property.property_service import (
     get_single_property,
     update_property,
     delete_property,
+    get_property_delete_blockers,
 )
 
 router = APIRouter(
@@ -57,8 +59,8 @@ async def create_property_route(
     district: str = Form(None),
     country: str = Form(None),
 
-    latitude: float = Form(None),
-    longitude: float = Form(None),
+    latitude: float = Form(None, ge=-90, le=90),
+    longitude: float = Form(None, ge=-180, le=180),
 
     owner_id: int = Form(...),
 
@@ -67,6 +69,12 @@ async def create_property_route(
 
     db: Session = Depends(get_db),
 ):
+
+    if (latitude is None) != (longitude is None):
+        raise HTTPException(
+            status_code=422,
+            detail="Latitude and longitude must be provided together.",
+        )
 
     property_data = await create_property(
         db=db,
@@ -165,14 +173,20 @@ async def update_property_route(
     district: str = Form(None),
     country: str = Form(None),
 
-    latitude: float = Form(None),
-    longitude: float = Form(None),
+    latitude: float = Form(None, ge=-90, le=90),
+    longitude: float = Form(None, ge=-180, le=180),
 
     image: UploadFile = File(None),
     video: UploadFile = File(None),
 
     db: Session = Depends(get_db),
 ):
+
+    if (latitude is None) != (longitude is None):
+        raise HTTPException(
+            status_code=422,
+            detail="Latitude and longitude must be provided together.",
+        )
 
     property_data = await update_property(
         db=db,
@@ -223,10 +237,28 @@ def delete_property_route(
     db: Session = Depends(get_db),
 ):
 
-    deleted = delete_property(
-        db,
-        property_id
-    )
+    blockers = get_property_delete_blockers(db, property_id)
+    active_references = {name: count for name, count in blockers.items() if count}
+    if active_references:
+        details = ", ".join(
+            f"{count} {name}" for name, count in active_references.items()
+        )
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot delete property {property_id}: it is still referenced by {details}. Resolve these records first; booking history is preserved.",
+        )
+
+    try:
+        deleted = delete_property(
+            db,
+            property_id
+        )
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete this property because it has related reviews, bookings, or favorites. Remove those records first.",
+        ) from exc
 
     if not deleted:
 
