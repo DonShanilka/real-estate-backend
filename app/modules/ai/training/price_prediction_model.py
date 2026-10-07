@@ -157,6 +157,10 @@ def train_price_model(records: list[Any], minimum_rows: int = MIN_TRAINING_ROWS)
     )
 
 
+def _millions(value: float) -> float:
+    return round(value / 1_000_000, 2)
+
+
 def predict_price(model: TrainedPriceModel, request: dict[str, Any]) -> dict[str, Any]:
     property_type = request.get("property_type")
     property_type = getattr(property_type, "value", property_type)
@@ -173,18 +177,22 @@ def predict_price(model: TrainedPriceModel, request: dict[str, Any]) -> dict[str
     model_input = {key: values[key] for key in model.used_features}
     estimate = float(model.model.predict(pd.DataFrame([model_input]))[0])
     margin = model.interval_margin
+    low = max(0.0, estimate - margin)
+    high = estimate + margin
     return {
-        "estimated_price": round(estimate, 2),
-        "expected_range": {
-            "low": round(max(0.0, estimate - margin), 2),
-            "high": round(estimate + margin, 2),
+        "estimated_price_million": _millions(estimate),
+        "expected_range_million": {"low": _millions(low), "high": _millions(high)},
+        "display": {
+            "estimated_market_price": f"Rs. {estimate / 1_000_000:.1f}M",
+            "expected_range": f"Rs. {low / 1_000_000:.0f}M – Rs. {high / 1_000_000:.0f}M",
         },
         "currency": "LKR",
+        "unit": "million",
         "model": "RandomForestRegressor",
         "training_rows": model.training_rows,
         "validation": f"{CV_FOLDS}-fold cross-validation",
         "range_coverage": RANGE_COVERAGE,
-        "validation_mae": round(model.mae, 2),
+        "validation_mae_million": _millions(model.mae),
         "validation_r2": round(model.r2, 4) if model.r2 is not None else None,
         "features_used": list(model.used_features),
         "limitations": [

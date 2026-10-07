@@ -50,10 +50,12 @@ class PricePredictionModelTests(unittest.TestCase):
 
         self.assertEqual(result["training_rows"], 100)
         self.assertEqual(result["validation"], "5-fold cross-validation")
-        self.assertGreater(result["estimated_price"], 8_000_000)
-        self.assertLess(result["estimated_price"], 120_000_000)
-        self.assertLessEqual(result["expected_range"]["low"], result["estimated_price"])
-        self.assertGreaterEqual(result["expected_range"]["high"], result["estimated_price"])
+        self.assertGreater(result["estimated_price_million"], 8)
+        self.assertLess(result["estimated_price_million"], 120)
+        self.assertEqual(result["unit"], "million")
+        self.assertRegex(result["display"]["estimated_market_price"], r"^Rs\. \d+\.\dM$")
+        self.assertLessEqual(result["expected_range_million"]["low"], result["estimated_price_million"])
+        self.assertGreaterEqual(result["expected_range_million"]["high"], result["estimated_price_million"])
         self.assertNotIn("land_area_perches", result["features_used"])
 
     def test_requires_sufficient_historical_data(self):
@@ -74,9 +76,9 @@ class PricePredictionModelTests(unittest.TestCase):
             "land_area_perches": 10,
         })
 
-        self.assertGreater(result["estimated_price"], 0)
-        self.assertLessEqual(result["expected_range"]["low"], result["estimated_price"])
-        self.assertGreaterEqual(result["expected_range"]["high"], result["estimated_price"])
+        self.assertGreater(result["estimated_price_million"], 0)
+        self.assertLessEqual(result["expected_range_million"]["low"], result["estimated_price_million"])
+        self.assertGreaterEqual(result["expected_range_million"]["high"], result["estimated_price_million"])
         self.assertEqual(result["training_rows"], len(records))
         self.assertIn("house_area_sqft", result["features_used"])
         self.assertIn("land_area_perches", result["features_used"])
@@ -102,7 +104,7 @@ class PricePredictionModelTests(unittest.TestCase):
         })
 
         self.assertEqual(model.training_rows, 40)
-        self.assertGreater(result["estimated_price"], 0)
+        self.assertGreater(result["estimated_price_million"], 0)
         self.assertNotIn("land_area_perches", result["features_used"])
         self.assertTrue(any("land_area_perches" in note for note in result["limitations"]))
 
