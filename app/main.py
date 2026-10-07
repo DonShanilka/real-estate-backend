@@ -15,6 +15,7 @@ from app.modules.favorites.favorite_routes import router as favorites_router
 from app.modules.review.review_routes import router as review_router
 from app.modules.bookings.booking_routes import router as booking_router
 from app.modules.ai.assistant_routes import router as property_assistant_router
+from app.modules.ai.price_prediction_routes import router as price_prediction_router
 
 
 # Import models
@@ -39,6 +40,7 @@ app.include_router(favorites_router)
 app.include_router(review_router)
 app.include_router(booking_router)
 app.include_router(property_assistant_router)
+app.include_router(price_prediction_router)
 
 # Root route
 @app.get("/")
