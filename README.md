@@ -1,8 +1,9 @@
 ## Run locally
 
-This is a FastAPI application. Use Python 3.10 or newer and run the commands below from the repository root on macOS:
+This is a FastAPI application. Use Python 3.10 or newer and run the commands below from the `backend` folder on macOS:
 
 ```sh
+cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
