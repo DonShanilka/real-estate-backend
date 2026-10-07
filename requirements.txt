@@ -4,3 +4,6 @@ python-jose
 passlib[bcrypt]
 pydantic
 python-dotenv
+numpy
+pandas
+scikit-learn
