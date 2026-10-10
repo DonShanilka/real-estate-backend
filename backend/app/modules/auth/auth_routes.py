@@ -3,13 +3,15 @@ from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
 from app.modules.auth.auth_schema import (
+    GoogleLoginSchema,
+    LoginSchema,
     RegisterSchema,
-    LoginSchema
 )
 
 from app.modules.auth.auth_service import (
+    google_login_user,
+    login_user,
     register_user,
-    login_user
 )
 
 router = APIRouter(
@@ -59,3 +61,11 @@ def login(
         "access_token": token,
         "token_type": "bearer"
     }
+
+@router.post("/google")
+def google_login(
+    body: GoogleLoginSchema,
+    db: Session = Depends(get_db),
+):
+    token = google_login_user(db, body.credential)
+    return {"access_token": token, "token_type": "bearer"}
