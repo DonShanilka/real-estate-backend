@@ -65,6 +65,13 @@ class Property(Base):
         ForeignKey("users.id")
     )
 
+    agent_id = Column(
+        Integer,
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+
     image_url = Column(String(500))
     video_url = Column(String(500))
 
@@ -75,5 +82,8 @@ class Property(Base):
 
     owner = relationship(
         "User",
-        back_populates="properties"
+        back_populates="properties",
+        foreign_keys=[owner_id],
     )
+
+    agent = relationship("User", foreign_keys=[agent_id])

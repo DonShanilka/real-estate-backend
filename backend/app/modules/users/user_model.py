@@ -31,5 +31,6 @@ class User(Base):
 
     properties = relationship(
         "Property",
-        back_populates="owner"
+        back_populates="owner",
+        foreign_keys="Property.owner_id",
     )

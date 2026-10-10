@@ -1,9 +1,11 @@
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 
 from app.modules.bookings.booking_model import Booking
 from app.modules.favorites.favorite_model import Favorite
 from app.modules.property.property_model import Property, PropertyType, PropertyStatus
 from app.modules.review.review_model import Review
+from app.modules.users.user_model import User, UserRole
 from app.core.upload_file import upload_file
 
 
@@ -166,6 +168,47 @@ def get_single_property(
         db.query(Property)
         .filter(Property.id == property_id)
         .first()
+    )
+
+
+def assign_property_agent(db: Session, property_id: int, actor_id: int, agent_id: int | None):
+    property_data = db.query(Property).filter(Property.id == property_id).first()
+    if not property_data:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    actor = db.query(User).filter(User.id == actor_id).first()
+    if not actor or not actor.is_active:
+        raise HTTPException(status_code=401, detail="Authenticated user not found")
+    if actor.role != UserRole.ADMIN and (
+        actor.role != UserRole.OWNER or property_data.owner_id != actor_id
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="Only the property owner or an admin can assign its agent",
+        )
+
+    if agent_id is None:
+        property_data.agent_id = None
+        db.commit()
+        db.refresh(property_data)
+        return property_data
+
+    agent = db.query(User).filter(User.id == agent_id).first()
+    if not agent or agent.role != UserRole.AGENT or not agent.is_active:
+        raise HTTPException(status_code=422, detail="Select an active agent account")
+
+    property_data.agent_id = agent.id
+    db.commit()
+    db.refresh(property_data)
+    return property_data
+
+
+def get_agent_properties(db: Session, agent_id: int):
+    return (
+        db.query(Property)
+        .filter(Property.agent_id == agent_id)
+        .order_by(Property.created_at.desc())
+        .all()
     )
 
 

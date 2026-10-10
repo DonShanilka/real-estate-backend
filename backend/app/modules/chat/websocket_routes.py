@@ -1,4 +1,4 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security_ws import get_current_user_from_ws
@@ -30,13 +30,17 @@ async def websocket_endpoint(
                 continue
 
             # Save message to database
-            new_message = ChatService.send(
-                db=db,
-                sender_id=user_id,
-                receiver_id=receiver_id,
-                property_id=property_id,
-                message=message_text
-            )
+            try:
+                new_message = ChatService.send(
+                    db=db,
+                    sender_id=user_id,
+                    receiver_id=receiver_id,
+                    property_id=property_id,
+                    message=message_text
+                )
+            except HTTPException as exc:
+                await websocket.send_json({"type": "error", "detail": exc.detail})
+                continue
 
             # Broadcast to receiver
             await manager.send_personal_message(

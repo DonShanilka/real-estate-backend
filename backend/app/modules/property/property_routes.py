@@ -9,6 +9,7 @@ from fastapi import (
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from app.core.security import get_current_user
 
 from app.core.database import SessionLocal
 
@@ -19,7 +20,11 @@ from app.modules.property.property_service import (
     update_property,
     delete_property,
     get_property_delete_blockers,
+    assign_property_agent,
+    get_agent_properties,
 )
+from app.modules.property.property_schema import PropertyAgentAssignment
+from app.modules.users.user_model import User, UserRole
 
 router = APIRouter(
     prefix="/properties",
@@ -123,6 +128,38 @@ def get_all_properties_route(
         "success": True,
         "count": len(properties),
         "data": properties,
+    }
+
+
+@router.get("/assigned-to-me")
+def get_assigned_properties_route(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    actor = db.query(User).filter(User.id == current_user["id"]).first()
+    if not actor or not actor.is_active:
+        raise HTTPException(status_code=401, detail="Authenticated user not found")
+    if actor.role != UserRole.AGENT:
+        raise HTTPException(status_code=403, detail="Agent account required")
+
+    properties = get_agent_properties(db, actor.id)
+    return {"success": True, "count": len(properties), "data": properties}
+
+
+@router.put("/{property_id}/agent")
+def assign_property_agent_route(
+    property_id: int,
+    assignment: PropertyAgentAssignment,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    property_data = assign_property_agent(
+        db, property_id, current_user["id"], assignment.agent_id
+    )
+    return {
+        "success": True,
+        "message": "Agent assigned to property",
+        "data": property_data,
     }
 
 
