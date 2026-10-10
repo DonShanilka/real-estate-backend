@@ -2,7 +2,7 @@ fastapi
 uvicorn[standard]
 python-jose
 passlib[bcrypt]
-pydantic
+pydantic[email]
 python-dotenv
 SQLAlchemy
 PyMySQL
@@ -11,3 +11,5 @@ numpy
 pandas
 scikit-learn
 python-multipart
+
+google-auth>=2.35.0,<3

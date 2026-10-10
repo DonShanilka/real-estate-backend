@@ -18,3 +18,8 @@ The API is served at <http://127.0.0.1:8000>, interactive API documentation is a
 Startup requires a reachable MySQL server with credentials that can create/use `real_estate_db`. The property routes also initialize Backblaze B2 during application import, so valid B2 credentials and network access are required even if you are not uploading files. These connection settings are currently hardcoded in the application; move them to environment variables and rotate any credentials that have been committed or shared before deploying.
 
 For development, keep the Uvicorn process running in the terminal. Stop it with Ctrl+C.
+
+
+### Google sign-in
+
+Set `GOOGLE_CLIENT_ID` in the backend environment and `VITE_GOOGLE_CLIENT_ID` in the frontend environment to the same Web OAuth client ID from Google Cloud Console. Add the local frontend origin (for example, `http://localhost:3000`) to the OAuth client's authorized JavaScript origins. Google ID tokens are verified by the backend before an account is created or signed in.
