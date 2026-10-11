@@ -75,3 +75,18 @@ def get_agent_inbox(
     if actor.role != UserRole.AGENT:
         raise HTTPException(status_code=403, detail="Agent account required")
     return ChatService.agent_inbox(db, actor.id)
+
+
+@router.post("/property/{property_id}/conversation/{other_user_id}/read")
+def mark_property_conversation_read(
+    property_id: int,
+    other_user_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    return ChatService.mark_property_conversation_read(
+        db=db,
+        current_user_id=current_user["id"],
+        other_user_id=other_user_id,
+        property_id=property_id,
+    )

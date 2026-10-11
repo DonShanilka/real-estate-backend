@@ -110,3 +110,89 @@ class ChatService:
     @staticmethod
     def agent_inbox(db: Session, agent_id: int):
         return ChatRepository.get_agent_inbox(db, agent_id)
+
+    @staticmethod
+    def mark_property_conversation_read(
+        db: Session,
+        current_user_id: int,
+        other_user_id: int,
+        property_id: int,
+    ):
+        # Get the logged-in user.
+        actor = (
+            db.query(User)
+            .filter(User.id == current_user_id)
+            .first()
+        )
+
+        if not actor or not actor.is_active:
+            raise HTTPException(
+                status_code=401,
+                detail="Active authenticated user required",
+            )
+
+        # Get the other participant.
+        other = (
+            db.query(User)
+            .filter(User.id == other_user_id)
+            .first()
+        )
+
+        if not other or not other.is_active:
+            raise HTTPException(
+                status_code=404,
+                detail="Conversation participant not found",
+            )
+
+        # Verify the property exists.
+        property_data = (
+            db.query(Property)
+            .filter(Property.id == property_id)
+            .first()
+        )
+
+        if not property_data:
+            raise HTTPException(
+                status_code=404,
+                detail="Property not found",
+            )
+
+        # Verify the logged-in user can access this conversation.
+        if actor.role == UserRole.AGENT:
+            if actor.id != property_data.agent_id:
+                raise HTTPException(
+                    status_code=403,
+                    detail="You are not assigned to this property",
+                )
+
+            if other.role != UserRole.BUYER:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Agent conversations are limited to buyers",
+                )
+
+        elif actor.role == UserRole.BUYER:
+            if (
+                other.role != UserRole.AGENT
+                or other.id != property_data.agent_id
+            ):
+                raise HTTPException(
+                    status_code=403,
+                    detail="This is not the property's assigned agent",
+                )
+
+        elif actor.role != UserRole.ADMIN:
+            raise HTTPException(
+                status_code=403,
+                detail="You are not allowed to access this conversation",
+            )
+
+        # Mark only incoming unread messages as read.
+        updated_count = ChatRepository.mark_property_conversation_read(
+            db=db,
+            current_user_id=current_user_id,
+            other_user_id=other_user_id,
+            property_id=property_id,
+        )
+
+        return {"updated": updated_count}

@@ -155,3 +155,33 @@ class ChatRepository:
                 "unread_count": thread["unread_count"],
             })
         return sorted(output, key=lambda item: item["last_message"].created_at, reverse=True)
+
+    @staticmethod
+    def mark_property_conversation_read(
+        db: Session,
+        current_user_id: int,
+        other_user_id: int,
+        property_id: int,
+    ) -> int:
+        """
+        Mark unread messages received by the current user
+        from the selected conversation participant as read.
+        """
+
+        updated_count = (
+            db.query(Message)
+            .filter(
+                Message.property_id == property_id,
+                Message.sender_id == other_user_id,
+                Message.receiver_id == current_user_id,
+                Message.is_read.is_(False),
+            )
+            .update(
+                {Message.is_read: True},
+                synchronize_session=False,
+            )
+        )
+
+        db.commit()
+
+        return updated_count
