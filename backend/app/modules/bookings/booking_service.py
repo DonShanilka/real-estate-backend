@@ -39,16 +39,22 @@ class BookingService:
         )
 
     @staticmethod
+    def get_agent(db: Session, agent_id: int):
+        return BookingRepository.get_agent_bookings(db, agent_id)
+
+    @staticmethod
     def update_status(
         db: Session,
         booking_id: int,
-        status: str
+        status: str,
+        actor_id: int,
     ):
 
         return BookingRepository.update_booking_status(
             db,
             booking_id,
-            status
+            status,
+            actor_id,
         )
 
     @staticmethod

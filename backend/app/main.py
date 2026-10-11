@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.database import ( engine, Base)
+from app.core.database import ( engine, Base, ensure_property_agent_column)
 
 from app.modules.auth.auth_routes import router as auth_router
 from app.modules.users.user_routes import router as user_router
@@ -20,6 +20,7 @@ from app.modules.users.user_model import User
 
 # Create tables
 Base.metadata.create_all(bind=engine)
+ensure_property_agent_column()
 
 # Create FastAPI app
 app = FastAPI(

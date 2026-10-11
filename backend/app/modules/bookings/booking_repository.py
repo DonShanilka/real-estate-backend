@@ -3,6 +3,8 @@ from sqlalchemy import and_
 
 from .booking_model import Booking
 from app.modules.property.property_model import Property
+from app.modules.users.user_model import User
+from fastapi import HTTPException
 
 
 class BookingRepository:
@@ -22,9 +24,12 @@ class BookingRepository:
         ).first()
 
         if not property_data:
-            return {
-                "message": "Property not found"
-            }
+            raise HTTPException(status_code=404, detail="Property not found")
+        if not property_data.agent_id:
+            raise HTTPException(
+                status_code=409,
+                detail="This property does not have an assigned agent yet",
+            )
 
         # Prevent double booking
         existing_booking = db.query(Booking).filter(
@@ -37,9 +42,13 @@ class BookingRepository:
         ).first()
 
         if existing_booking:
-            return {
-                "message": "Property already booked for selected dates"
-            }
+            raise HTTPException(
+                status_code=409,
+                detail="Property already booked for selected dates",
+            )
+
+        if check_out <= check_in:
+            raise HTTPException(status_code=422, detail="Check-out must be after check-in")
 
         days = (check_out - check_in).days
 
@@ -75,20 +84,73 @@ class BookingRepository:
         ).all()
 
     @staticmethod
+    def get_agent_bookings(db: Session, agent_id: int):
+        rows = (
+            db.query(Booking, Property, User)
+            .join(Property, Booking.property_id == Property.id)
+            .join(User, Booking.user_id == User.id)
+            .filter(Property.agent_id == agent_id)
+            .order_by(Booking.created_at.desc())
+            .all()
+        )
+        return [
+            {
+                "id": booking.id,
+                "user_id": booking.user_id,
+                "property_id": property_data.id,
+                "check_in": booking.check_in,
+                "check_out": booking.check_out,
+                "total_price": booking.total_price,
+                "status": booking.status,
+                "created_at": booking.created_at,
+                "buyer": {
+                    "id": buyer.id,
+                    "full_name": buyer.full_name,
+                    "email": buyer.email,
+                    "phone": buyer.phone,
+                },
+                "property": {
+                    "id": property_data.id,
+                    "title": property_data.title,
+                    "address": property_data.address,
+                    "city": property_data.city,
+                    "image_url": property_data.image_url,
+                },
+            }
+            for booking, property_data, buyer in rows
+        ]
+
+    @staticmethod
     def update_booking_status(
         db: Session,
         booking_id: int,
-        status: str
+        status: str,
+        actor_id: int,
     ):
 
+        status = status.strip().lower()
         booking = db.query(Booking).filter(
             Booking.id == booking_id
         ).first()
 
         if not booking:
-            return {
-                "message": "Booking not found"
-            }
+            raise HTTPException(status_code=404, detail="Booking not found")
+
+        actor = db.query(User).filter(User.id == actor_id).first()
+        property_data = db.query(Property).filter(Property.id == booking.property_id).first()
+        if not actor or not actor.is_active:
+            raise HTTPException(status_code=401, detail="Authenticated user not found")
+        if actor.role.value == "ADMIN":
+            pass
+        elif actor.role.value == "AGENT" and property_data.agent_id == actor_id:
+            pass
+        elif actor.role.value == "BUYER" and booking.user_id == actor_id and status == "cancelled":
+            pass
+        else:
+            raise HTTPException(status_code=403, detail="You cannot update this booking")
+
+        if status not in {"pending", "confirmed", "cancelled", "completed"}:
+            raise HTTPException(status_code=422, detail="Invalid booking status")
 
         booking.status = status
 
