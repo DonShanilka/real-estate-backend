@@ -1,3 +1,5 @@
+from email import message
+
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
@@ -15,51 +17,116 @@ class ChatService:
         sender_id: int,
         receiver_id: int,
         property_id: int,
-        message: str
+        message: str,
     ):
-
+    # Validate message
         if not message or not message.strip():
-            raise HTTPException(status_code=422, detail="Message cannot be empty")
+            raise HTTPException(
+                status_code=422,
+                detail="Message cannot be empty",
+        )
+
         if sender_id == receiver_id:
-            raise HTTPException(status_code=422, detail="Cannot message yourself")
+            raise HTTPException(
+                status_code=422,
+                detail="Cannot message yourself",
+        )
 
-        sender = db.query(User).filter(User.id == sender_id).first()
-        receiver = db.query(User).filter(User.id == receiver_id).first()
-        if not sender or not sender.is_active or not receiver or not receiver.is_active:
-            raise HTTPException(status_code=404, detail="Active sender and receiver are required")
+        # Validate sender and receiver
+        sender = (
+            db.query(User)
+            .filter(User.id == sender_id)
+            .first()
+        )
 
-        if property_id is None and sender.role in {UserRole.BUYER, UserRole.AGENT}:
-            raise HTTPException(status_code=422, detail="A property is required for buyer-agent messages")
+        receiver = (
+            db.query(User)
+            .filter(User.id == receiver_id)
+            .first()
+        )
+
+        if (
+            not sender
+            or not sender.is_active
+            or not receiver
+            or not receiver.is_active
+        ):
+            raise HTTPException(
+                status_code=404,
+                detail="Active sender and receiver are required",
+            )
+
+        # Buyer-agent messaging requires a property
+        if (
+            property_id is None
+            and sender.role in {UserRole.BUYER, UserRole.AGENT}
+        ):
+            raise HTTPException(
+                status_code=422,
+                detail="A property is required for buyer-agent messages",
+            )
 
         if property_id is not None:
-            property_data = db.query(Property).filter(Property.id == property_id).first()
+            property_data = (
+                db.query(Property)
+                .filter(Property.id == property_id)
+                .first()
+            )
+
             if not property_data:
-                raise HTTPException(status_code=404, detail="Property not found")
+                raise HTTPException(
+                    status_code=404,
+                    detail="Property not found",
+                )
+
             if not property_data.agent_id:
-                raise HTTPException(status_code=409, detail="This property has no assigned agent")
+                raise HTTPException(
+                    status_code=409,
+                    detail="This property has no assigned agent",
+                )
 
+            # Buyer -> assigned agent
             if sender.role == UserRole.BUYER:
-                if receiver.role != UserRole.AGENT or receiver.id != property_data.agent_id:
-                    raise HTTPException(status_code=403, detail="Contact this property's assigned agent")
-            elif sender.role == UserRole.AGENT:
-                if sender.id != property_data.agent_id or receiver.role != UserRole.BUYER:
-                    raise HTTPException(status_code=403, detail="You are not assigned to this property")
-                buyer_started_thread = db.query(Message.id).filter(
-                    Message.property_id == property_id,
-                    Message.sender_id == receiver_id,
-                    Message.receiver_id == sender_id,
-                ).first()
-                if not buyer_started_thread:
-                    raise HTTPException(status_code=403, detail="Reply to a buyer's property inquiry first")
-            elif sender.role != UserRole.ADMIN:
-                raise HTTPException(status_code=403, detail="Buyer or assigned agent account required")
+                if (
+                    receiver.role != UserRole.AGENT
+                    or receiver.id != property_data.agent_id
+                ):
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Contact this property's assigned agent",
+                    )
 
+            # Assigned agent -> buyer
+            elif sender.role == UserRole.AGENT:
+                if sender.id != property_data.agent_id:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="You are not assigned to this property",
+                    )
+
+                if receiver.role != UserRole.BUYER:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Agents can only message buyers",
+                    )
+
+                # IMPORTANT:
+                # Do not require the buyer to have sent a message first.
+                # The assigned agent can initiate the conversation.
+
+            elif sender.role != UserRole.ADMIN:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Buyer or assigned agent account required",
+                )
+
+        # Save the message
         return ChatRepository.send_message(
-            db,
-            sender_id,
-            receiver_id,
-            property_id,
-            message
+            db=db,
+            sender_id=sender_id,
+            receiver_id=receiver_id,
+            property_id=property_id,
+            message=message.strip(),
         )
 
     @staticmethod
