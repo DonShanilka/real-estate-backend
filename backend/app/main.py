@@ -15,6 +15,7 @@ from app.modules.ai.assistant_routes import router as property_assistant_router
 from app.modules.ai.price_prediction_routes import router as price_prediction_router
 from app.modules.chat.chat_routes import router as chat_router
 from app.modules.chat.websocket_routes import router as websocket_router
+from app.modules.payment.payment_routes import router as payment_router
 
 from app.modules.users.user_model import User
 
@@ -58,6 +59,7 @@ app.include_router(property_assistant_router)
 app.include_router(price_prediction_router)
 app.include_router(chat_router)
 app.include_router(websocket_router)
+app.include_router(payment_router)
 
 
 # ROOT ROUTE
